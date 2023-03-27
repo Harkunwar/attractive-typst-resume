@@ -1,4 +1,4 @@
-name: use nix
+name: build resume
 
 on: push
 jobs:
