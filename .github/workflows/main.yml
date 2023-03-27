@@ -18,3 +18,9 @@ jobs:
     - name: build resume
       run: ./build.sh
       shell: bash
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: Resume
+        path: resume.pdf
+        if-no-files-found: error
