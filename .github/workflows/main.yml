@@ -1,0 +1,20 @@
+name: use nix
+
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: "Setup env"
+      uses: JRMurr/direnv-nix-action@v2
+
+    - name: use typst
+      run: typst --version
+      shell: bash
+
+    - name: build resume
+      run: ./build.sh
+      shell: bash
