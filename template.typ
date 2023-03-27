@@ -1,27 +1,32 @@
+#let contact(text: "", link: none) = {
+  (text: text, link: link)
+}
+
+#let subSection(title: "", titleEnd: none, subTitle: none, subTitleEnd: none, content: []) = {
+  (title: title, titleEnd: titleEnd, subTitle: subTitle, subTitleEnd: subTitleEnd, content: content)
+}
+
+#let section(title: "", content: subSection()) = {
+  (title: title, content: content)
+}
+
 #let project(
+  theme: rgb("#4273B0"),
   name: "",
   email: none,
-  jobTitle: none,
-  themeColor: rgb("#4273B0"),
-  contactInfo: (
-    phone: none,
-    email: none,
-    github: none,
-    linkedin: none,
-    website: none,
-  ),
+  title: none,
+  contact: ((text: [], link: "")),
   skills: (
     languages: ()
   ),
-  authors: (),
+  main: (
+    (title: "", content: [])
+  ),
+  sidebar: (),
   body) = {
 
-  let themeLink(uri, content) = {
-    underline(link(uri, text(themeColor, content)))
-  }
-
   let backgroundTitle(content) = {
-    align(center, box(fill: themeColor, text(white, size: 1.25em, weight: "bold", upper(content)), width: 1fr, inset: 0.3em))
+    align(center, box(fill: theme, text(white, size: 1.25em, weight: "bold", upper(content)), width: 1fr, inset: 0.3em))
   }
 
   let secondaryTitle(content) = {
@@ -29,75 +34,102 @@
   }
 
   let italicColorTitle(content) = {
-    text(weight: "bold", style: "italic", size: 1.125em, themeColor, content)
+    text(weight: "bold", style: "italic", size: 1.125em, theme, content)
   }
 
-  set page(
-    margin: (left: 10mm, right: 10mm, top: 15mm, bottom: 15mm),
-  )
-  
-  set text(font: "Century Gothic", lang: "en")
 
-  let formattedName = block(upper(text(2.5em, weight: "bold", themeColor, name)))
+  let formattedName = block(upper(text(2.5em, weight: "bold", theme, name)))
 
-  let formattedJobTitle = block(upper(text(2.25em, gray.darken(50%), jobTitle)))
+  let formattedTitle = block(upper(text(2.25em, gray.darken(50%), title)))
 
   let titleColumn = align(center)[
     #formattedName
-    #formattedJobTitle
+    #formattedTitle
   ]
 
-  let formattedEmail = themeLink("mailto:"+contactInfo.email, contactInfo.email)
-
-  let formattedGithub = themeLink("https://github.com/"+contactInfo.github, "GitHub.com/"+contactInfo.github)
-
-  let formattedLinkedIn = themeLink("https://www.linkedin.com/in/"+contactInfo.linkedin, "LinkedIn.com/in/"+contactInfo.linkedin)
-
-  let formattedWebsite = themeLink("https://"+contactInfo.website, contactInfo.website)
-
-  let contactInfoColumn = align(center)[
-    #formattedEmail\
-    #formattedGithub\
-    #formattedLinkedIn\
-    #formattedWebsite\
-  ]
+  let contactColumn = align(center)[#contact.map(c => {
+    if c.link == none [
+      #c.text\
+    ] else [
+      #underline(link(c.link, text(theme, c.text)))\
+    ]
+  }).join()]
 
   grid(
     columns: (1fr, 2fr),
     column-gutter: 2em,
-    contactInfoColumn,
+    contactColumn,
     titleColumn,
   )
   
   set par(justify: true)
 
   let formattedLanguageSkills = [
-    #secondaryTitle("Languages")\
     #text(skills.languages.join(" • "))
   ]
 
-  let leftSide = [
-    #backgroundTitle("Skills")
-    #formattedLanguageSkills
-  ]
+  let createLeftRight(left: [], right: none) = {
+    if (right == none) { 
+      align(start, text(left))
+    } else {
+      grid(
+        columns: (1fr, 1fr),
+        align(start, text(left)),
+        align(end, right),
+      )
+    } 
+  }
 
-  let formattedWorkExperience = [
-    #secondaryTitle("Splunk")\
-    #italicColorTitle("Software Engineer")
-  ]
+//  let parseContentList(contentList) = {
+//    if contentList.format == "bulletJoin" [
+//      #text(contentList.content.join(" • "))
+//    ] else if contentList.format == "bulletList" [
+//      #contentList.content.map(c => list(c)).join()
+//    ]
+//  }
 
-  let rightSide = [
-    #backgroundTitle("Relevant Work Experience")
-    #formattedWorkExperience
-  ]
+  let parseSubSections(subSections) = {
+    subSections.map(s => {
+      [
+        #createLeftRight(
+          left: secondaryTitle(s.title),
+          right: if s.titleEnd != none { 
+            italicColorTitle(s.titleEnd)
+          }
+        )
+        #if s.subTitle != none or s.subTitleEnd != none [
+          #text(
+            top-edge: 0.2em,
+            createLeftRight(
+              left: italicColorTitle(s.subTitle),
+              right: s.subTitleEnd
+            ),
+          )
+        ]
+        #s.content
+      ]
+    }).join()
+  }
+
+  let parseSection(section) = {
+    section.map(m => {
+      [
+        #backgroundTitle(m.title)
+        #parseSubSections(m.content)
+      ]
+    }).join()
+  }
+
+  let mainSection = parseSection(main)
+  let sidebarSection = parseSection(sidebar)
+
 
   grid(
     columns: (1fr, 2fr),
     column-gutter: 1em,
-    leftSide,
-    rightSide,
+    sidebarSection,
+    mainSection,
   )
-
 
   // Main body.
   set par(justify: true)
