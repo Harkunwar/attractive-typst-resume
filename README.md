@@ -6,4 +6,4 @@ Mirror link at Typst.app https://typst.app/project/rLlknWbYc8XMaZc45BHlMl
 
 Preview:\
 <img src="assets/images/attractive-typst-resume-blue.png" width="400px" />
-<img src="assets/images/attractive-typst-resume-green.png" width="400px" />]
+<img src="assets/images/attractive-typst-resume-green.png" width="400px" />
